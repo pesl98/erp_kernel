@@ -29,7 +29,8 @@ The system strictly enforces **Hexagonal Architecture** to decouple Business Log
     ├── persistence/    # SQLite / SQLAlchemy
     ├── web/            # FastAPI Routers
     └── ui/             # Streamlit Dashboard
-3. Key Capabilities
+
+##3. Key Capabilities
 A. The "Three-Way Match" (Fraud Protection) Unlike simple inventory scripts, AERP separates Purchasing from Receiving.
 
 Rule: You cannot receive goods without a valid, issued Purchase Order (PO).
@@ -50,7 +51,7 @@ Human: Via Streamlit UI.
 
 Agent: Via Semantic API (/system/capabilities).
 
-4. Getting Started
+##4. Getting Started
 Prerequisites
 Python 3.10+
 
@@ -74,7 +75,7 @@ The "Face" runs on Streamlit (Port 8501).
 Bash
 
 streamlit run infrastructure/ui/app.py
-5. Testing & Verification
+##5. Testing & Verification
 We use a Testing Pyramid strategy:
 
 Unit Tests: Verify Domain Logic in isolation (In-Memory).
