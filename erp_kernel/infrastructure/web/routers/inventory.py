@@ -35,8 +35,20 @@ class ReceiveGoodsRequest(BaseModel):
 @router.post("/receive")
 async def receive_goods(req: ReceiveGoodsRequest, db: Session = Depends(get_db)):
     # 1. Wire Adapters
+    # 1. Wire Adapters
     repo = SqliteStockRepository(db)
-    bus = SimpleEventBus() # Placeholder
+    
+    # 2026-01-07: Use Real Event Persistence for E2E tests to pass
+    # In production, this might publish to a message queue, but here we just write to DB.
+    # We construct a simple adapter that uses the same DB session.
+    class PersistentEventBus(EventBus):
+        def __init__(self, db_session):
+            self.store = SqliteEventStore(db_session)
+        async def publish(self, events):
+            await self.store.save(events)
+        def subscribe(self, event_type, handler): pass
+
+    bus = PersistentEventBus(db)
     service = InventoryService(repository=repo, event_bus=bus)
     
     # 2. Convert to Command
