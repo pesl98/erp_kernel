@@ -34,5 +34,16 @@ class StockModel(Base):
     bin_location = Column(String)
     last_updated = Column(DateTime, default=datetime.utcnow)
 
+class ExpectedInboundModel(Base):
+    __tablename__ = "expected_inbound"
+
+    # Composite Key ideally, but using ID for simplicity in this MVP
+    id = Column(Integer, primary_key=True, autoincrement=True) 
+    po_id = Column(String, index=True, nullable=False)
+    sku = Column(String, index=True, nullable=False)
+    qty_ordered = Column(Integer, nullable=False)
+    qty_received = Column(Integer, default=0)
+    tenant_id = Column(String, index=True)
+
 def init_db():
     Base.metadata.create_all(bind=engine)

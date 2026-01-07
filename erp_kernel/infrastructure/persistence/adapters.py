@@ -10,7 +10,7 @@ from erp_kernel.core.base_event import BaseEvent
 from erp_kernel.core.ports import EventStore
 from erp_kernel.modules.inventory.domain.models import StockItem
 from erp_kernel.modules.inventory.ports import StockRepository
-from erp_kernel.infrastructure.persistence.database import EventModel, StockModel, SessionLocal
+from erp_kernel.infrastructure.persistence.database import EventModel, StockModel, ExpectedInboundModel, SessionLocal
 
 # --- Event Store Adapter ---
 
@@ -38,6 +38,31 @@ class SqliteEventStore(EventStore):
         return []
 
 # --- Stock Repository Adapter ---
+
+from erp_kernel.modules.inventory.ports import InboundOrderRepository
+
+class SqliteInboundOrderRepository(InboundOrderRepository):
+    def __init__(self, db: Session):
+        self.db = db
+        
+    async def get_expectation(self, po_id: str, sku: str) -> Optional[dict]:
+        record = self.db.query(ExpectedInboundModel).filter(
+            ExpectedInboundModel.po_id == po_id,
+            ExpectedInboundModel.sku == sku
+        ).first()
+        
+        if record:
+            return {'qty_ordered': record.qty_ordered, 'qty_received': record.qty_received}
+        return None
+
+    async def update_received(self, po_id: str, sku: str, qty: int) -> None:
+        record = self.db.query(ExpectedInboundModel).filter(
+            ExpectedInboundModel.po_id == po_id,
+            ExpectedInboundModel.sku == sku
+        ).first()
+        if record:
+            record.qty_received += qty
+            self.db.commit()
 
 class SqliteStockRepository(StockRepository):
     def __init__(self, db: Session):
